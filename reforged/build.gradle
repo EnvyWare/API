@@ -27,6 +27,10 @@ repositories {
         name = 'spongepowered-repo'
         url = 'https://repo.spongepowered.org/maven'
     }
+
+    flatDir {
+        dirs './libs/'
+    }
 }
 
 dependencies {
@@ -36,6 +40,8 @@ dependencies {
 
     shadow project(':commons')
     shadow project(':forge')
+
+    implementation fg.deobf('com.pixelmonmod.pixelmon:Pixelmon-1.12.2-8.2.0-server-pipe5568:1.0')
 }
 
 shadowJar {
