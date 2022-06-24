@@ -34,4 +34,12 @@ public abstract class AbstractForgeAttribute<A> implements PlayerAttribute<A> {
     public UUID getUuid() {
         return this.uuid;
     }
+
+    public ForgeEnvyPlayer getParent() {
+        return parent;
+    }
+
+    public A getManager() {
+        return manager;
+    }
 }
