@@ -91,6 +91,8 @@ public class ForgeGui implements Gui {
                 }
 
                 parent.containerMenu = new ForgeGuiContainer(this, parent);
+                parent.containerCounter = 1;
+                parent.connection.send(new ClientboundOpenScreenPacket(parent.containerCounter, this.getContainerType(), title));
                 ((ForgeGuiContainer) parent.containerMenu).refreshPlayerContents();
                 this.containers.add(((ForgeGuiContainer) parent.containerMenu));
             });
