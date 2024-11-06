@@ -153,14 +153,16 @@ public class UtilSprite {
                         .replace("%shiny%", pokemon.isShiny() ? config.getShinyTrueFormat() : config.getShinyFalseFormat())
                         .replace("%form%", pokemon.getForm().getLocalizedName())
                         .replace("%size%", pokemon.getGrowth().getLocalizedName())
-                        .replace("%friendship%", pokemon.getFriendship() + "");
+                        .replace("%friendship%", pokemon.getFriendship() + "")
+                        .replace("%original_trainer%", pokemon.getOriginalTrainer() == null ? config.getNotApplicable() : pokemon.getOriginalTrainer());
 
         if (extraStats instanceof MewStats) {
             line = line.replace("%mew_cloned%", config.getMewClonedFormat()
                     .replace("%cloned%", ((MewStats) extraStats).numCloned + ""));
         } else {
             if (line.contains("%mew_cloned%") || line.contains("%cloned%")) {
-                line = null;
+                line = line.replace("%mew_cloned%", config.getMewClonedFormat()
+                        .replace("%cloned%", config.getNotApplicable()));
             }
         }
 
@@ -170,7 +172,8 @@ public class UtilSprite {
                         .replace("%gemmed%", ((LakeTrioStats)extraStats).numEnchanted + ""));
             } else {
                 if (line.contains("%trio_gemmed%") || line.contains("%gemmed%")) {
-                    line = null;
+                    line = line.replace("%trio_gemmed%", config.getGemmedFormat()
+                            .replace("%gemmed%", config.getNotApplicable()));
                 }
             }
         }

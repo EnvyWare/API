@@ -61,6 +61,7 @@ public class SpriteConfig {
     private String mintNatureFormat = "&7(%mint_nature_name%&7)";
     private String normalIvColour = "&b";
     private String hyperIvColour = "&e";
+    private String notApplicable = "&7N/A";
 
     public SpriteConfig() {}
 
@@ -139,4 +140,6 @@ public class SpriteConfig {
     public String getShinyFalseFormat() {
         return this.shinyFalseFormat;
     }
+
+    public String getNotApplicable() { return notApplicable; }
 }
