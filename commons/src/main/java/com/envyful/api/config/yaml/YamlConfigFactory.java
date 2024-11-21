@@ -119,7 +119,7 @@ public class YamlConfigFactory {
         for (var defaultConfig : defaults) {
             var file = new File(configDirectory, defaultConfig.getFileName());
 
-            if (file.exists() && !defaultConfig.shouldReplaceExisting()) {
+            if (file.getParentFile().exists() || file.exists() && !defaultConfig.shouldReplaceExisting()) {
                 continue;
             }
 
