@@ -163,10 +163,6 @@ public class YamlOps implements DynamicOps<CommentedConfigurationNode> {
 
     @Override
     public DataResult<CommentedConfigurationNode> mergeToMap(CommentedConfigurationNode map, CommentedConfigurationNode key, CommentedConfigurationNode value) {
-        if (!map.isMap() && map != empty()) {
-            return DataResult.error(() -> "mergeToMap called with not a map: " + map, map);
-        }
-
         var rawKey = key.raw();
 
         if (!(rawKey instanceof String)) {
@@ -187,10 +183,6 @@ public class YamlOps implements DynamicOps<CommentedConfigurationNode> {
 
     @Override
     public DataResult<CommentedConfigurationNode> mergeToMap(CommentedConfigurationNode map, MapLike<CommentedConfigurationNode> values) {
-        if (!map.isMap() && map != empty()) {
-            return DataResult.error(() -> "mergeToMap called with not a map: " + map, map);
-        }
-
         var newMap = empty();
         newMap.from(map);
 
