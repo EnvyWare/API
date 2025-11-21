@@ -381,6 +381,28 @@ public class ExtendedConfigItem {
             return this;
         }
 
+        public Builder clearPositions() {
+            this.positions.clear();
+            return this;
+        }
+
+        public Builder setPositions(Map<String, Pair<Integer, Integer>> positions) {
+            this.positions.clear();
+            this.positions.putAll(positions);
+            return this;
+        }
+
+        public Builder setEnchants(Map<String, ConfigItem.EnchantData> enchants) {
+            this.enchants.clear();
+            this.enchants.putAll(enchants);
+            return this;
+        }
+
+        public Builder clearEnchants() {
+            this.enchants.clear();
+            return this;
+        }
+
         public Builder noPermission() {
             this.requiresPermission = false;
             return this;
