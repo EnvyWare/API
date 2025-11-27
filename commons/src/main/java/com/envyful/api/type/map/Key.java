@@ -12,10 +12,17 @@ public class Key<T> {
 
     private final String key;
     private final Class<T> valueType;
+    private final BiFunction<String, T, String> placeholder;
 
     public Key(String key, Class<T> valueType) {
         this.key = key;
         this.valueType = valueType;
+    }
+
+    public Key(String key, Class<T> typeClass, BiFunction<String, T, String> placeholder) {
+        this.key = key;
+        this.typeClass = typeClass;
+        this.placeholder = placeholder;
     }
 
     public String getKey() {
@@ -24,6 +31,10 @@ public class Key<T> {
 
     public Class<T> getValueType() {
         return this.valueType;
+    }
+
+    public String replace(String s, T value) {
+        return this.placeholder.apply(s, value);
     }
 
     @Override
