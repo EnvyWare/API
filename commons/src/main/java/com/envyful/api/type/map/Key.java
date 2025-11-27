@@ -17,6 +17,7 @@ public class Key<T> {
     public Key(String key, Class<T> valueType) {
         this.key = key;
         this.valueType = valueType;
+        this.placeholder =  (s, t) -> s;
     }
 
     public Key(String key, Class<T> valueType, BiFunction<String, T, String> placeholder) {
