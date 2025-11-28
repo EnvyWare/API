@@ -1,6 +1,7 @@
 package com.envyful.api.type.map;
 
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 /**
  *
@@ -12,10 +13,18 @@ public class Key<T> {
 
     private final String key;
     private final Class<T> valueType;
+    private final BiFunction<String, T, String> placeholder;
 
     public Key(String key, Class<T> valueType) {
         this.key = key;
         this.valueType = valueType;
+        this.placeholder =  (s, t) -> s;
+    }
+
+    public Key(String key, Class<T> valueType, BiFunction<String, T, String> placeholder) {
+        this.key = key;
+        this.valueType = valueType;
+        this.placeholder = placeholder;
     }
 
     public String getKey() {
@@ -24,6 +33,10 @@ public class Key<T> {
 
     public Class<T> getValueType() {
         return this.valueType;
+    }
+
+    public String replace(String s, T value) {
+        return this.placeholder.apply(s, value);
     }
 
     @Override
