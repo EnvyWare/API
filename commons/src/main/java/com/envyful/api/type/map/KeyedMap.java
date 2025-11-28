@@ -1,5 +1,6 @@
 package com.envyful.api.type.map;
 
+import com.envyful.api.text.parse.SimplePlaceholder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import java.util.Map;
  * desired type and hide the casting from the user
  *
  */
-public class KeyedMap {
+public class KeyedMap implements SimplePlaceholder {
 
     private static final KeyedMap EMPTY = new KeyedMap(Map.of());
 
@@ -41,5 +42,14 @@ public class KeyedMap {
 
     public static KeyedMap empty() {
         return EMPTY;
+    }
+
+    @Override
+    public String replace(String s) {
+        for (Map.Entry<Key<?>, Object> entry : this.map.entrySet()) {
+            Key key = entry.getKey();
+            s = key.replace(s, entry.getValue());
+        }
+        return s;
     }
 }

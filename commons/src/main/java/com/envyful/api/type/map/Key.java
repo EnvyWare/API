@@ -1,6 +1,7 @@
 package com.envyful.api.type.map;
 
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 /**
  *
