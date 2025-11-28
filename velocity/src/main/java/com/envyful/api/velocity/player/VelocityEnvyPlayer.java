@@ -114,4 +114,9 @@ public class VelocityEnvyPlayer extends AbstractEnvyPlayer<Player> {
     public void closeInventory() {
         //TODO:
     }
+
+    @Override
+    public boolean hasInventorySpace(int emptySlots) {
+        return false;
+    }
 }

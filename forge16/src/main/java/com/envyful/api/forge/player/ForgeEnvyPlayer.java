@@ -127,4 +127,17 @@ public class ForgeEnvyPlayer extends AbstractEnvyPlayer<ServerPlayerEntity> {
     public void closeInventory() {
         this.getParent().closeContainer();
     }
+
+    @Override
+    public boolean hasInventorySpace(int emptySlots) {
+        int spaces = 0;
+
+        for (int i = 0; i < this.getParent().inventory.getContainerSize(); i++) {
+            if (this.getParent().inventory.getItem(i).isEmpty()) {
+                spaces++;
+            }
+        }
+
+        return spaces >= emptySlots;
+    }
 }

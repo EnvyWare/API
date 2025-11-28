@@ -98,6 +98,16 @@ public interface EnvyPlayer<T> extends SimplePlaceholder, Messageable<T>, Attrib
 
     /**
      *
+     * Checks if the player has the given amount of empty slots
+     * in their inventory
+     *
+     * @param emptySlots The amount of empty slots to check for
+     * @return If the player has the given amount of empty slots
+     */
+    boolean hasInventorySpace(int emptySlots);
+
+    /**
+     *
      * Teleports the player to the given location
      *
      * @param location The location to teleport the player to

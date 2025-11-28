@@ -112,4 +112,18 @@ public class SpigotEnvyPlayer extends AbstractEnvyPlayer<Player> {
     public void closeInventory() {
         this.getParent().closeInventory();
     }
+
+    @Override
+    public boolean hasInventorySpace(int emptySlots) {
+        int spaces = 0;
+
+        for (int i = 0; i < this.getParent().getInventory().getSize(); i++) {
+            var item = this.getParent().getInventory().getItem(i);
+            if (item == null || item.isEmpty()) {
+                spaces++;
+            }
+        }
+
+        return spaces >= emptySlots;
+    }
 }
