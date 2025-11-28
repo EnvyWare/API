@@ -130,7 +130,7 @@ public class ForgeEnvyPlayer extends AbstractEnvyPlayer<ServerPlayer> {
     public boolean hasInventorySpace(int emptySlots) {
         int spaces = 0;
 
-        for (int i = 0; i < this.getParent().getInventory().getContainerSize(); i++) {
+        for (int i = 0; i < this.getParent().getInventory().items.size(); i++) {
             if (this.getParent().getInventory().getItem(i).isEmpty()) {
                 spaces++;
             }
