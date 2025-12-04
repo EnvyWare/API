@@ -1,9 +1,12 @@
 package com.envyful.api.config.type;
 
+import com.envyful.api.text.Placeholder;
+import com.envyful.api.time.UtilTimeFormat;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
@@ -45,5 +48,29 @@ public class DateFormatConfig {
 
     public String format(long time) {
         return this.format(new Date(time));
+    }
+
+    public Placeholder wrap(Instant date) {
+        return this.wrap("%date%", date);
+    }
+
+    public Placeholder wrap(Date date) {
+        return this.wrap("%date%", date);
+    }
+
+    public Placeholder wrap(long date) {
+        return this.wrap("%date%", date);
+    }
+
+    public Placeholder wrap(String key, Instant date) {
+        return Placeholder.simple(key, this.format(date));
+    }
+
+    public Placeholder wrap(String key, Date date) {
+        return Placeholder.simple(key, this.format(date));
+    }
+
+    public Placeholder wrap(String key, long date) {
+        return Placeholder.simple(key, this.format(date));
     }
 }
