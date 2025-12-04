@@ -2,6 +2,7 @@ package com.envyful.api.neoforge.config;
 
 import com.envyful.api.config.type.ExtendedConfigItem;
 import com.envyful.api.platform.PlatformProxy;
+import com.envyful.api.player.EnvyPlayer;
 import com.envyful.api.text.Placeholder;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -18,12 +19,14 @@ public class ConfigReward {
     protected ExtendedConfigItem displayItem;
     protected List<String> commands;
     protected List<String> messages;
+    protected int requiredInventorySpace = -1;
 
     protected ConfigReward(Builder builder) {
         this.displayName = builder.displayName;
         this.displayItem = builder.displayItem;
         this.commands = builder.commands;
         this.messages = builder.messages;
+        this.requiredInventorySpace = builder.requiredInventorySpace;
     }
 
     public ConfigReward() {
@@ -43,6 +46,10 @@ public class ConfigReward {
 
     public List<String> getMessages() {
         return this.messages;
+    }
+
+    public boolean hasSufficientInventorySpace(EnvyPlayer<?> player) {
+        return this.requiredInventorySpace == -1 || player.hasInventorySpace(this.requiredInventorySpace);
     }
 
     public void execute(Placeholder... placeholders) {
@@ -74,6 +81,7 @@ public class ConfigReward {
         protected ExtendedConfigItem displayItem;
         protected List<String> commands = new ArrayList<>();
         protected List<String> messages = new ArrayList<>();
+        protected int requiredInventorySpace = -1;
 
         protected Builder() {}
 
@@ -102,6 +110,11 @@ public class ConfigReward {
 
         public Builder messages(List<String> messages) {
             this.messages.addAll(messages);
+            return this;
+        }
+
+        public Builder requiredInventorySpace(int requiredInventorySpace) {
+            this.requiredInventorySpace = requiredInventorySpace;
             return this;
         }
 
