@@ -1,12 +1,10 @@
 package com.envyful.api.config.type;
 
 import com.envyful.api.text.Placeholder;
-import com.envyful.api.time.UtilTimeFormat;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
