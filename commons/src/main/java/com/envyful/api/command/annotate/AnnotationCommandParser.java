@@ -401,6 +401,11 @@ public class AnnotationCommandParser<A extends PlatformCommand<B>, B> implements
                 }
 
                 var senderType = getSenderType(completable);
+
+                if (senderType == null) {
+                    throw new CommandParseException("Unrecognized sender type used in tab completer for parameter " + i + " in method " + commandProcessor.getName() + " in class " + commandInstance.getClass().getName());
+                }
+
                 tabCompleters.add(new TabCompleteAnnotations(completable, annotations, senderType));
             } else {
                 tabCompleters.add(null);
