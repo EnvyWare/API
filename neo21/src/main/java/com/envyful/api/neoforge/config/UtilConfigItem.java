@@ -82,8 +82,8 @@ public class UtilConfigItem {
             return null;
         }
 
-        ItemBuilder itemBuilder = new ItemBuilder()
-                .type(fromNameOrId(type.get(0)))
+        var itemBuilder = new ItemBuilder()
+                .type(fromNameOrId(type.getFirst()))
                 .amount(configItem.getAmount(placeholders));
 
         itemBuilder.lore(PlaceholderFactory.handlePlaceholders(configItem.getLore(), PlatformProxy::<Component>parse, placeholders));
@@ -216,14 +216,12 @@ public class UtilConfigItem {
             int integer = UtilParse.parseInt(data).orElse(-1);
 
             if (integer == -1) {
-                UtilLogger.getLogger().error("Invalid item type provided: {}", data);
-                return null;
+                throw new IllegalArgumentException("Invalid item type provided: " + data);
             }
 
             return Item.byId(integer);
         } catch (ResourceLocationException e) {
-            UtilLogger.getLogger().error("Invalid item type provided: {}", data);
-            return null;
+            throw new IllegalArgumentException("Invalid item type provided: " + data, e);
         }
     }
 
