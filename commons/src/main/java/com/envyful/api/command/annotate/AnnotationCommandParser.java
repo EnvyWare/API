@@ -401,11 +401,6 @@ public class AnnotationCommandParser<A extends PlatformCommand<B>, B> implements
                 }
 
                 var senderType = getSenderType(completable);
-
-                if (senderType == null) {
-                    throw new CommandParseException("Unrecognized sender type used in tab completer for parameter " + i + " in method " + commandProcessor.getName() + " in class " + commandInstance.getClass().getName());
-                }
-
                 tabCompleters.add(new TabCompleteAnnotations(completable, annotations, senderType));
             } else {
                 tabCompleters.add(null);
@@ -419,10 +414,20 @@ public class AnnotationCommandParser<A extends PlatformCommand<B>, B> implements
         var completerClass = completer.getClass();
 
         try {
-            for (Method declaredMethod : completerClass.getDeclaredMethods()) {
-                if (declaredMethod.getName().equalsIgnoreCase("getCompletions")) {
-                    var parameterTypes = declaredMethod.getParameterTypes();
-                    return SenderTypeFactory.getSenderType(parameterTypes[0]).orElse(null);
+            for (var method : completerClass.getDeclaredMethods()) {
+                if (method.isBridge() || method.isSynthetic()) {
+                    continue;
+                }
+
+                if (method.getName().equalsIgnoreCase("getCompletions")) {
+                    var parameterTypes = method.getParameterTypes();
+                    var senderType = SenderTypeFactory.getSenderType(parameterTypes[0]).orElse(null);
+
+                    if (senderType != null) {
+                        return senderType;
+                    } else {
+                        throw new CommandParseException("Unrecognized sender type used in tab completer " + completerClass.getName() + " for getCompletions method " + parameterTypes[0].getName() + " " + method.toGenericString());
+                    }
                 }
             }
 
