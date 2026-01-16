@@ -5,15 +5,19 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.StatefulRedisConnection;
 
+import javax.sql.DataSource;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 
 /**
  *
  * Interface representing a database connection
  *
  */
-public interface Database {
+public interface Database extends DataSource {
 
     /**
      *
@@ -128,4 +132,49 @@ public interface Database {
      */
     void close();
 
+    /**
+     *
+     * SQL DataSource methods
+     *
+     */
+
+    @Override
+    default Connection getConnection(String username, String password) throws SQLException {
+        throw new UnsupportedOperationException("Not an SQL database");
+    }
+
+    @Override
+    default PrintWriter getLogWriter() throws SQLException {
+        throw new UnsupportedOperationException("Not an SQL database");
+    }
+
+    @Override
+    default void setLogWriter(PrintWriter out) throws SQLException {
+        throw new UnsupportedOperationException("Not an SQL database");
+    }
+
+    @Override
+    default void setLoginTimeout(int seconds) throws SQLException {
+        throw new UnsupportedOperationException("Not an SQL database");
+    }
+
+    @Override
+    default int getLoginTimeout() throws SQLException {
+        throw new UnsupportedOperationException("Not an SQL database");
+    }
+
+    @Override
+    default Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        throw new UnsupportedOperationException("Not an SQL database");
+    }
+
+    @Override
+    default <T> T unwrap(Class<T> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not an SQL database");
+    }
+
+    @Override
+    default boolean isWrapperFor(Class<?> iface) throws SQLException {
+        throw new UnsupportedOperationException("Not an SQL database");
+    }
 }

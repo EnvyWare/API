@@ -5,9 +5,12 @@ import com.envyful.api.database.Database;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  *
@@ -89,5 +92,46 @@ public class SimpleHikariDatabase implements Database {
     @Override
     public void close() {
         this.hikari.close();
+    }
+
+
+    @Override
+    public Connection getConnection(String username, String password) throws SQLException {
+        return this.hikari.getConnection(username, password);
+    }
+
+    @Override
+    public PrintWriter getLogWriter() throws SQLException {
+        return this.hikari.getLogWriter();
+    }
+
+    @Override
+    public void setLogWriter(PrintWriter out) throws SQLException {
+        this.hikari.setLogWriter(out);
+    }
+
+    @Override
+    public void setLoginTimeout(int seconds) throws SQLException {
+        this.hikari.setLoginTimeout(seconds);
+    }
+
+    @Override
+    public int getLoginTimeout() throws SQLException {
+        return this.hikari.getLoginTimeout();
+    }
+
+    @Override
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return this.hikari.getParentLogger();
+    }
+
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return this.hikari.unwrap(iface);
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return this.hikari.isWrapperFor(iface);
     }
 }
