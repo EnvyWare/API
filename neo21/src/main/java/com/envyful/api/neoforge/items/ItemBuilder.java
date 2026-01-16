@@ -1,5 +1,6 @@
 package com.envyful.api.neoforge.items;
 
+import com.envyful.api.concurrency.UtilLogger;
 import com.envyful.api.platform.PlatformProxy;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
@@ -285,9 +286,10 @@ public class ItemBuilder implements Cloneable {
         }
 
         ItemStack itemStack = new ItemStack(this.type, this.amount);
+        itemStack.applyComponents(this.dataComponents);
 
         if (!customData.isEmpty()) {
-            CompoundTag compound = new CompoundTag();
+            CompoundTag compound = itemStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 
             for (Map.Entry<String, Tag> entry : customData.entrySet()) {
                 compound.put(entry.getKey(), entry.getValue());
@@ -317,8 +319,6 @@ public class ItemBuilder implements Cloneable {
                 itemFlag.apply(itemStack);
             }
         }
-
-        itemStack.applyComponents(this.dataComponents);
 
         return itemStack;
     }
