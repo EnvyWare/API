@@ -91,22 +91,32 @@ public class UtilConfigInterface {
             var pane = this.configInterface.toPane(placeholders);
             int pages = this.items.size() / this.configInterface.getPositions().size();
 
-            if (this.shouldShowChangePageButtons(page, pages)) {
+            if (this.configInterface.isDisplayPageButtonsAtLimits() || (pages > page)) {
                 this.configInterface.getNextPageButton()
                         .convertToBuilder(player, pane, placeholders)
                         .clickHandler((envyPlayer, clickType) -> {
-                            if (this.configInterface.isLoopPages()) {
-                                open(player, page == pages ? 1 : page + 1, placeholders);
+                            int nextPage = page + 1;
+
+                            if (nextPage > pages && this.configInterface.isLoopPages()) {
+                                nextPage = 1;
                             }
+
+                            open(player, nextPage, placeholders);
                         })
                         .build();
+            }
 
+            if (this.configInterface.isDisplayPageButtonsAtLimits() || (page > 1)) {
                 this.configInterface.getPreviousPageButton()
                         .convertToBuilder(player, pane, placeholders)
                         .clickHandler((envyPlayer, clickType) -> {
-                            if (this.configInterface.isLoopPages()) {
-                                open(player, page == 1 ? pages : page - 1, placeholders);
+                            int previousPage = page - 1;
+
+                            if (previousPage < 1 && this.configInterface.isLoopPages()) {
+                                previousPage = pages;
                             }
+
+                            open(player, previousPage, placeholders);
                         })
                         .build();
             }
@@ -114,7 +124,7 @@ public class UtilConfigInterface {
             for (int i = 0; i < this.configInterface.getPositions().size(); i++) {
                 int itemId = ((page - 1) * this.configInterface.getPositions().size()) + i;
 
-                if (itemId >= (this.items.size())) {
+                if (itemId >= (this.items.size()) || itemId < 0) {
                     continue;
                 }
 
@@ -137,14 +147,6 @@ public class UtilConfigInterface {
                     .title(PlatformProxy.flatParse(this.configInterface.getTitle(), placeholders))
                     .build()
                     .open(player);
-        }
-
-        private boolean shouldShowChangePageButtons(int page, int pages) {
-            if (this.configInterface.isDisplayPageButtonsAtLimits()) {
-                return true;
-            }
-
-            return page == pages || page == 1;
         }
 
         private Displayable getDisplayable(ForgeEnvyPlayer player, T item, Placeholder... placeholders) {
