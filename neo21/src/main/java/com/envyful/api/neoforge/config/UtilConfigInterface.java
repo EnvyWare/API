@@ -88,12 +88,19 @@ public class UtilConfigInterface {
         }
 
         public void open(ForgeEnvyPlayer player, int page, Placeholder... placeholders) {
-            var pane = this.configInterface.toPane(placeholders);
             int pages = this.items.size() / this.configInterface.getPositions().size();
+            var finalPlaceholders = Arrays.copyOfRange(placeholders, 0, placeholders.length + 4);
+            finalPlaceholders[placeholders.length] = Placeholder.simple("%current_page%", String.valueOf(page));
+            finalPlaceholders[placeholders.length + 1] = Placeholder.simple("%next_page%", String.valueOf(page == pages ? (this.configInterface.isLoopPages() ? 1 : pages) : page + 1));
+            finalPlaceholders[placeholders.length + 2] = Placeholder.simple("%previous_page%", String.valueOf(page == 1 ? (this.configInterface.isLoopPages() ? pages : 1) : page - 1));
+            finalPlaceholders[placeholders.length + 3] = Placeholder.simple("%total_pages%", String.valueOf(pages));
+
+            var pane = this.configInterface.toPane(finalPlaceholders);
+
 
             if (this.configInterface.isDisplayPageButtonsAtLimits() || (pages > page)) {
                 this.configInterface.getNextPageButton()
-                        .convertToBuilder(player, pane, placeholders)
+                        .convertToBuilder(player, pane, finalPlaceholders)
                         .clickHandler((envyPlayer, clickType) -> {
                             int nextPage = page + 1;
 
@@ -108,7 +115,7 @@ public class UtilConfigInterface {
 
             if (this.configInterface.isDisplayPageButtonsAtLimits() || (page > 1)) {
                 this.configInterface.getPreviousPageButton()
-                        .convertToBuilder(player, pane, placeholders)
+                        .convertToBuilder(player, pane, finalPlaceholders)
                         .clickHandler((envyPlayer, clickType) -> {
                             int previousPage = page - 1;
 
@@ -133,7 +140,7 @@ public class UtilConfigInterface {
                 int posY = position / 9;
                 T item = this.items.get(itemId);
 
-                pane.set(posX, posY, this.getDisplayable(player, item, placeholders));
+                pane.set(posX, posY, this.getDisplayable(player, item, finalPlaceholders));
             }
 
             for (var extraItem : this.extraItems) {
@@ -144,7 +151,7 @@ public class UtilConfigInterface {
                     .addPane(pane)
                     .height(this.configInterface.getHeight())
                     .closeConsumer(this.closeConsumer)
-                    .title(PlatformProxy.flatParse(this.configInterface.getTitle(), placeholders))
+                    .title(PlatformProxy.flatParse(this.configInterface.getTitle(), finalPlaceholders))
                     .build()
                     .open(player);
         }
