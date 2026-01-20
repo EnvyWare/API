@@ -97,7 +97,7 @@ public class UtilConfigInterface {
                         .clickHandler((envyPlayer, clickType) -> {
                             int nextPage = page + 1;
 
-                            if (nextPage > pages && this.configInterface.isLoopPages()) {
+                            if (nextPage > (pages + 1) && this.configInterface.isLoopPages()) {
                                 nextPage = 1;
                             }
 
