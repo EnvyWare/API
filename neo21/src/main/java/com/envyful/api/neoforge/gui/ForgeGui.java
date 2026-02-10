@@ -23,6 +23,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -70,10 +71,12 @@ public class ForgeGui implements Gui {
     }
 
     @Override
-    public void open(EnvyPlayer<?> player) {
+    public CompletableFuture<Void> open(EnvyPlayer<?> player) {
         if (!(player instanceof ForgeEnvyPlayer)) {
-            return;
+            return null;
         }
+
+        var future = new CompletableFuture<Void>();
 
         PlatformProxy.runSync(() -> {
             ServerPlayer parent = (ServerPlayer) player.getParent();
@@ -86,7 +89,10 @@ public class ForgeGui implements Gui {
             parent.containerMenu.broadcastChanges();
             this.containers.add(((ForgeGuiContainer) parent.containerMenu));
             ForgeGuiTracker.addGui(player, this);
+            future.complete(null);
         });
+
+        return future;
     }
 
     public void update() {

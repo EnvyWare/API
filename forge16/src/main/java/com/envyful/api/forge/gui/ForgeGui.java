@@ -27,6 +27,7 @@ import net.minecraft.util.text.ITextComponent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -74,12 +75,13 @@ public class ForgeGui implements Gui {
     }
 
     @Override
-    public void open(EnvyPlayer<?> player) {
+    public CompletableFuture<Void> open(EnvyPlayer<?> player) {
         if (!(player instanceof ForgeEnvyPlayer)) {
-            return;
+            return null;
         }
 
         var parent = (ServerPlayerEntity)player.getParent();
+        var future = new CompletableFuture<Void>();
 
         if (ForgeGuiTracker.inGui(player) && parent.containerMenu != parent.inventoryMenu &&
                 Objects.equals(parent.containerMenu.getType(), this.getContainerType())) {
@@ -92,8 +94,9 @@ public class ForgeGui implements Gui {
                 parent.containerMenu = new ForgeGuiContainer(this, parent);
                 ((ForgeGuiContainer) parent.containerMenu).refreshPlayerContents();
                 this.containers.add(((ForgeGuiContainer) parent.containerMenu));
+                future.complete(null);
             });
-            return;
+            return future;
         }
 
         PlatformProxy.runSync(() -> {
@@ -108,8 +111,10 @@ public class ForgeGui implements Gui {
                 container.refreshPlayerContents();
                 this.containers.add(container);
                 ForgeGuiTracker.addGui(player, this);
+                future.complete(null);
             });
         });
+        return future;
     }
 
     public void update() {

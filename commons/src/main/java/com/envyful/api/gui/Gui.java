@@ -4,6 +4,8 @@ import com.envyful.api.gui.close.CloseConsumer;
 import com.envyful.api.gui.pane.Pane;
 import com.envyful.api.player.EnvyPlayer;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  *
  * An interface representing chest GUIs for the platform specific implementation
@@ -17,7 +19,7 @@ public interface Gui {
      *
      * @param player The player to open the GUI for
      */
-    void open(EnvyPlayer<?> player);
+    CompletableFuture<Void> open(EnvyPlayer<?> player);
 
     /**
      *

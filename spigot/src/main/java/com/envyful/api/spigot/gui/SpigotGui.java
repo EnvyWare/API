@@ -18,6 +18,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  *
  * Spigot implementation of the {@link Gui} interface.
@@ -51,11 +53,12 @@ public class SpigotGui implements Gui {
     }
 
     @Override
-    public void open(EnvyPlayer<?> player) {
+    public CompletableFuture<Void> open(EnvyPlayer<?> player) {
         if (!(player instanceof SpigotEnvyPlayer)) {
-            return;
+            return null;
         }
 
+        var future = new CompletableFuture<Void>();
         Player parent = (Player)player.getParent();
         SpigotGuiTracker.InventoryDetails details = SpigotGuiTracker.getDetails(player);
         Inventory inventory = details != null ? details.getInventory() : Bukkit.createInventory(null, this.height * 9, this.title);
@@ -95,6 +98,8 @@ public class SpigotGui implements Gui {
         }
 
         SpigotGuiTracker.addGui(player, this, inventory);
+        future.complete(null);
+        return future;
     }
 
     public static class Listener implements org.bukkit.event.Listener  {
