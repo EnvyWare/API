@@ -3,6 +3,7 @@ package com.envyful.api.neoforge.gui;
 import com.envyful.api.gui.Gui;
 import com.envyful.api.gui.item.Displayable;
 import com.envyful.api.gui.pane.Pane;
+import com.envyful.api.neoforge.concurrency.UtilForgeConcurrency;
 import com.envyful.api.neoforge.gui.close.ForgeCloseConsumer;
 import com.envyful.api.neoforge.gui.item.EmptySlot;
 import com.envyful.api.neoforge.gui.pane.ForgeSimplePane;
@@ -11,18 +12,18 @@ import com.envyful.api.platform.PlatformProxy;
 import com.envyful.api.player.EnvyPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -76,20 +77,38 @@ public class ForgeGui implements Gui {
             return null;
         }
 
+        var parent = (ServerPlayer) player.getParent();
         var future = new CompletableFuture<Void>();
 
+        if (ForgeGuiTracker.inGui(player) && parent.containerMenu != parent.inventoryMenu &&
+                Objects.equals(parent.containerMenu.getType(), this.getContainerType())) {
+            PlatformProxy.runSync(() -> {
+                if (parent.containerMenu instanceof ForgeGuiContainer) {
+                    ((ForgeGuiContainer)parent.containerMenu).gui.closeConsumer.handle((ForgeEnvyPlayer)player);
+                    this.containers.remove((parent.containerMenu));
+                }
+
+                parent.containerMenu = new ForgeGuiContainer(this, parent, parent.containerMenu.containerId);
+                ((ForgeGuiContainer) parent.containerMenu).refreshPlayerContents();
+                this.containers.add(((ForgeGuiContainer) parent.containerMenu));
+                future.complete(null);
+            });
+            return future;
+        }
+
         PlatformProxy.runSync(() -> {
-            ServerPlayer parent = (ServerPlayer) player.getParent();
             parent.closeContainer();
 
-            var provider = new SimpleMenuProvider((i, inventory, player1) -> new ForgeGuiContainer(this, parent), this.title);
+            UtilForgeConcurrency.runWhenTrue(__ -> parent.containerMenu == parent.containerMenu, () -> {
+                var provider = new SimpleMenuProvider((i, inventory, player1) -> new ForgeGuiContainer(this, parent, i), this.title);
 
-            parent.openMenu(provider);
-            ForgeGuiTracker.dequeueUpdate(parent);
-            parent.containerMenu.broadcastChanges();
-            this.containers.add(((ForgeGuiContainer) parent.containerMenu));
-            ForgeGuiTracker.addGui(player, this);
-            future.complete(null);
+                parent.openMenu(provider);
+                ForgeGuiTracker.dequeueUpdate(parent);
+                parent.containerMenu.broadcastChanges();
+                this.containers.add(((ForgeGuiContainer) parent.containerMenu));
+                ForgeGuiTracker.addGui(player, this);
+                future.complete(null);
+            });
         });
 
         return future;
@@ -132,13 +151,36 @@ public class ForgeGui implements Gui {
         private boolean updating = false;
         protected boolean suppressSlotUpdates = false;
 
-        public ForgeGuiContainer(ForgeGui gui, ServerPlayer player) {
-            super(gui.getContainerType(), 1);
+        public ForgeGuiContainer(ForgeGui gui, ServerPlayer player, int containerCounter) {
+            super(gui.getContainerType(), containerCounter);
 
             this.gui = gui;
             this.player = player;
 
             this.create(this.gui.panes);
+
+            this.setSynchronizer(new ContainerSynchronizer() {
+                @Override
+                public void sendInitialData(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList, ItemStack itemStack, int[] ints) {
+                    ForgeGuiContainer.this.player.connection
+                            .send(new ClientboundContainerSetContentPacket(ForgeGuiContainer.this.containerId, ForgeGuiContainer.this.incrementStateId(), nonNullList, itemStack));
+                }
+
+                @Override
+                public void sendSlotChange(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
+
+                }
+
+                @Override
+                public void sendCarriedChange(AbstractContainerMenu abstractContainerMenu, ItemStack itemStack) {
+
+                }
+
+                @Override
+                public void sendDataChange(AbstractContainerMenu abstractContainerMenu, int i, int i1) {
+
+                }
+            });
         }
 
         @Override
@@ -358,13 +400,7 @@ public class ForgeGui implements Gui {
             this.closed = true;
             super.removed(player);
 
-            var sender = (ServerPlayer) playerIn;
             var player = PlatformProxy.getPlayerManager().getPlayer(playerIn.getUUID());
-
-            int windowId = sender.containerMenu.containerId;
-
-//            ClientboundContainerClosePacket closeWindowServer = new ClientboundContainerClosePacket(windowId);
-//            sender.connection.send(closeWindowServer);
 
             this.gui.closeConsumer.handle((ForgeEnvyPlayer) player);
 
