@@ -13,6 +13,7 @@ import com.envyful.api.player.EnvyPlayer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket;
+import net.minecraft.network.protocol.game.ClientboundContainerSetDataPacket;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,6 +21,7 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.payload.AdvancedContainerSetDataPayload;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,9 +85,9 @@ public class ForgeGui implements Gui {
         if (ForgeGuiTracker.inGui(player) && parent.containerMenu != parent.inventoryMenu &&
                 Objects.equals(parent.containerMenu.getType(), this.getContainerType())) {
             PlatformProxy.runSync(() -> {
-                if (parent.containerMenu instanceof ForgeGuiContainer) {
-                    ((ForgeGuiContainer)parent.containerMenu).gui.closeConsumer.handle((ForgeEnvyPlayer)player);
-                    this.containers.remove((parent.containerMenu));
+                if (parent.containerMenu instanceof ForgeGuiContainer container) {
+                    container.gui.closeConsumer.handle((ForgeEnvyPlayer)player);
+                    this.containers.remove(container);
                 }
 
                 parent.containerMenu = new ForgeGuiContainer(this, parent, parent.containerMenu.containerId);
@@ -164,21 +166,30 @@ public class ForgeGui implements Gui {
                 public void sendInitialData(AbstractContainerMenu abstractContainerMenu, NonNullList<ItemStack> nonNullList, ItemStack itemStack, int[] ints) {
                     ForgeGuiContainer.this.player.connection
                             .send(new ClientboundContainerSetContentPacket(ForgeGuiContainer.this.containerId, ForgeGuiContainer.this.incrementStateId(), nonNullList, itemStack));
-                }
-
-                @Override
-                public void sendSlotChange(AbstractContainerMenu abstractContainerMenu, int i, ItemStack itemStack) {
-
-                }
-
-                @Override
-                public void sendCarriedChange(AbstractContainerMenu abstractContainerMenu, ItemStack itemStack) {
+                    for(int i = 0; i < ints.length; ++i) {
+                        this.broadcastDataValue(abstractContainerMenu, i, ints[i]);
+                    }
 
                 }
 
-                @Override
-                public void sendDataChange(AbstractContainerMenu abstractContainerMenu, int i, int i1) {
+                public void sendSlotChange(AbstractContainerMenu p_143441_, int p_143442_, ItemStack p_143443_) {
+                    ForgeGuiContainer.this.player.connection.send(new ClientboundContainerSetSlotPacket(p_143441_.containerId, p_143441_.incrementStateId(), p_143442_, p_143443_));
+                }
 
+                public void sendCarriedChange(AbstractContainerMenu p_143445_, ItemStack p_143446_) {
+                    ForgeGuiContainer.this.player.connection.send(new ClientboundContainerSetSlotPacket(-1, p_143445_.incrementStateId(), -1, p_143446_));
+                }
+
+                public void sendDataChange(AbstractContainerMenu p_143437_, int p_143438_, int p_143439_) {
+                    this.broadcastDataValue(p_143437_, p_143438_, p_143439_);
+                }
+
+                private void broadcastDataValue(AbstractContainerMenu p_143455_, int p_143456_, int p_143457_) {
+                    if (ForgeGuiContainer.this.player.connection.hasChannel(AdvancedContainerSetDataPayload.TYPE)) {
+                        ForgeGuiContainer.this.player.connection.send(new AdvancedContainerSetDataPayload((byte)p_143455_.containerId, (short)p_143456_, p_143457_));
+                    } else {
+                        ForgeGuiContainer.this.player.connection.send(new ClientboundContainerSetDataPacket(p_143455_.containerId, p_143456_, p_143457_));
+                    }
                 }
             });
         }
