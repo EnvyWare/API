@@ -8,8 +8,8 @@ import com.google.gson.JsonObject;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 @ConfigSerializable
 public class DiscordEmbedConfig extends AbstractYamlConfig {
@@ -78,21 +78,21 @@ public class DiscordEmbedConfig extends AbstractYamlConfig {
             jsonEmbed.add("footer", jsonFooter);
         }
 
-        if (writtenImage != null) {
+        if (writtenImage != null && !writtenImage.isEmpty()) {
             JsonObject jsonImage = new JsonObject();
 
             jsonImage.addProperty("url", writtenImage.getUrl());
             jsonEmbed.add("image", jsonImage);
         }
 
-        if (writtenThumbnail != null) {
+        if (writtenThumbnail != null && !writtenThumbnail.isEmpty()) {
             JsonObject jsonThumbnail = new JsonObject();
 
             jsonThumbnail.addProperty("url", writtenThumbnail.getUrl());
             jsonEmbed.add("thumbnail", jsonThumbnail);
         }
 
-        if (writtenAuthor != null) {
+        if (writtenAuthor != null && !writtenAuthor.isEmpty()) {
             JsonObject jsonAuthor = new JsonObject();
 
             jsonAuthor.addProperty("name", writtenAuthor.getName());
@@ -177,6 +177,11 @@ public class DiscordEmbedConfig extends AbstractYamlConfig {
             return iconUrl;
         }
 
+        public boolean isEmpty() {
+            return (text == null || text.isEmpty()) &&
+                    (iconUrl == null || iconUrl.isEmpty());
+        }
+
     }
 
     @ConfigSerializable
@@ -195,6 +200,9 @@ public class DiscordEmbedConfig extends AbstractYamlConfig {
             return url;
         }
 
+        public boolean isEmpty() {
+            return url == null || url.isEmpty();
+        }
     }
 
     @ConfigSerializable
@@ -213,6 +221,9 @@ public class DiscordEmbedConfig extends AbstractYamlConfig {
             return url;
         }
 
+        public boolean isEmpty() {
+            return url == null || url.isEmpty();
+        }
     }
 
     @ConfigSerializable
@@ -242,6 +253,11 @@ public class DiscordEmbedConfig extends AbstractYamlConfig {
             return iconUrl;
         }
 
+        public boolean isEmpty() {
+            return (name == null || name.isEmpty()) &&
+                    (url == null || url.isEmpty()) &&
+                    (iconUrl == null || iconUrl.isEmpty());
+        }
     }
 
     @ConfigSerializable
