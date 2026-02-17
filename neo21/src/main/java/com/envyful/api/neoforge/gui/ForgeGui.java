@@ -105,6 +105,12 @@ public class ForgeGui implements Gui {
                 var provider = new SimpleMenuProvider((i, inventory, player1) -> new ForgeGuiContainer(this, parent, i), this.title);
 
                 parent.openMenu(provider);
+
+                if (!(parent.containerMenu instanceof ForgeGuiContainer)) {
+                    future.completeExceptionally(new IllegalStateException("Failed to open GUI for player " + player.getName()));
+                    return;
+                }
+
                 ForgeGuiTracker.dequeueUpdate(parent);
                 parent.containerMenu.broadcastChanges();
                 this.containers.add(((ForgeGuiContainer) parent.containerMenu));
