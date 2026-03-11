@@ -74,6 +74,7 @@ public class SimpleHikariDatabase implements Database {
         config.addDataSourceProperty("useLocalSessionState", true);
         config.addDataSourceProperty("characterEncoding","utf8");
         config.addDataSourceProperty("useUnicode","true");
+        config.addDataSourceProperty("allowMultiQueries", true);
         config.addDataSourceProperty("maxLifetime",
                 TimeUnit.SECONDS.toMillis(maxLifeTime));
         config.setMaxLifetime(TimeUnit.SECONDS.toMillis(maxLifeTime));
