@@ -1,9 +1,14 @@
 package com.envyful.api.reforged.pixelmon.sprite;
 
+import com.pixelmonmod.pixelmon.api.pokemon.PokemonBase;
+import com.pixelmonmod.pixelmon.api.pokemon.item.pokeball.PokeBall;
+import com.pixelmonmod.pixelmon.api.pokemon.item.pokeball.PokeBallRegistry;
 import com.pixelmonmod.pixelmon.api.pokemon.species.Species;
 import com.pixelmonmod.pixelmon.api.pokemon.species.Stats;
 import com.pixelmonmod.pixelmon.api.pokemon.species.gender.Gender;
 import com.pixelmonmod.pixelmon.init.registry.ItemRegistration;
+import com.pixelmonmod.pixelmon.init.registry.PixelmonDataComponents;
+import com.pixelmonmod.pixelmon.items.SpriteItem;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
@@ -22,6 +27,7 @@ public class SpriteBuilder {
     private Species species;
     private Gender gender = Gender.MALE;
     private String palette = "none";
+    private int eggCycles = -1;
 
     private String nick = null;
     private Stats form = null;
@@ -35,6 +41,11 @@ public class SpriteBuilder {
 
     public SpriteBuilder gender(Gender gender) {
         this.gender = gender;
+        return this;
+    }
+
+    public SpriteBuilder eggCycles(int eggCycles) {
+        this.eggCycles = eggCycles;
         return this;
     }
 
@@ -59,21 +70,12 @@ public class SpriteBuilder {
 
     public ItemStack build() {
         ItemStack itemStack = new ItemStack(ItemRegistration.PIXELMON_SPRITE.get());
-        var data = new CompoundTag();
-        data.put("ndex", ShortTag.valueOf((short) this.species.getDex()));
 
-        if (this.form != null) {
-            data.put("form", StringTag.valueOf(this.form.getName()));
-        }
-
-        data.put("gender", ByteTag.valueOf((byte)this.gender.ordinal()));
-        data.put("palette", StringTag.valueOf(this.palette));
-
+        itemStack.set(PixelmonDataComponents.POKEMON_BASE, new PokemonBase(species.getDex(), form.getName(), gender, palette, eggCycles, (PokeBall) PokeBallRegistry.POKE_BALL.getValueUnsafe()));
         if (this.nick != null && !this.nick.isEmpty()) {
-            data.put("Nickname", StringTag.valueOf(this.nick));
+            itemStack.set(PixelmonDataComponents.NICKNAME, this.nick);
         }
 
-        itemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(data));
         return itemStack;
     }
 }
