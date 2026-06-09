@@ -1,7 +1,7 @@
 package com.envyful.api.reforged.config;
 
+import com.envyful.api.InitializationTask;
 import com.envyful.api.config.ConfigTypeSerializer;
-import com.envyful.api.neoforge.InitializationTask;
 import com.pixelmonmod.api.pokemon.PokemonSpecification;
 import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
 import org.checkerframework.checker.nullness.qual.Nullable;
