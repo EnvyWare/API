@@ -1,9 +1,9 @@
 package com.envyful.api.neoforge.platform;
 
+import com.envyful.api.InitializationTask;
 import com.envyful.api.concurrency.UtilLogger;
 import com.envyful.api.config.ConfigToast;
 import com.envyful.api.config.type.ConfigItem;
-import com.envyful.api.neoforge.InitializationTask;
 import com.envyful.api.neoforge.config.yaml.YamlOps;
 import com.envyful.api.neoforge.player.util.UtilPlayer;
 import com.envyful.api.neoforge.player.util.UtilToast;
@@ -11,6 +11,7 @@ import com.envyful.api.platform.PlatformHandler;
 import com.envyful.api.platform.PlatformProxy;
 import com.envyful.api.platform.StandardPlatformHandler;
 import com.envyful.api.player.EnvyPlayer;
+import com.envyful.api.scanning.PlatformScanning;
 import com.envyful.api.text.Placeholder;
 import com.envyful.api.text.PlaceholderFactory;
 import net.minecraft.commands.CommandSource;
@@ -244,5 +245,10 @@ public class ForgePlatformHandler extends StandardPlatformHandler<CommandSource>
         }
 
         return true;
+    }
+
+    @Override
+    public PlatformScanning scanning() {
+        return ForgePlatformScanning.INSTANCE;
     }
 }
