@@ -17,16 +17,16 @@ import java.util.List;
 import java.util.Map;
 
 @ConfigSerializable
-public class ConfigMenuItem {
+public class MenuItem {
 
     private ConfigItem item = new ConfigItem();
     private List<MenuPosition> positions = new ArrayList<>();
     private List<ItemDisplayRule> displayRules = new ArrayList<>();
     private List<ClickAction> actions = new ArrayList<>();
 
-    public ConfigMenuItem() {}
+    public MenuItem() {}
 
-    public ConfigMenuItem(ConfigItem item) {
+    public MenuItem(ConfigItem item) {
         this.item = item;
     }
 
@@ -100,7 +100,7 @@ public class ConfigMenuItem {
 
     public static class Builder {
 
-        private ConfigMenuItem built = new ConfigMenuItem();
+        private MenuItem built = new MenuItem();
 
         protected Builder() {
         }
@@ -265,7 +265,7 @@ public class ConfigMenuItem {
             return this;
         }
 
-        public ConfigMenuItem build() {
+        public MenuItem build() {
             return this.built;
         }
     }
