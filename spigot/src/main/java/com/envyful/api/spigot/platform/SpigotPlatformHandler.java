@@ -5,6 +5,8 @@ import com.envyful.api.config.type.ConfigItem;
 import com.envyful.api.platform.PlatformHandler;
 import com.envyful.api.platform.StandardPlatformHandler;
 import com.envyful.api.player.EnvyPlayer;
+import com.envyful.api.scanning.NoOpPlatformScanning;
+import com.envyful.api.scanning.PlatformScanning;
 import com.envyful.api.text.Placeholder;
 import com.envyful.api.text.PlaceholderFactory;
 import net.kyori.adventure.audience.Audience;
@@ -103,5 +105,10 @@ public class SpigotPlatformHandler extends StandardPlatformHandler<Audience> {
     @Override
     public boolean isItem(Object itemStack, ConfigItem item) {
         return false;
+    }
+
+    @Override
+    public PlatformScanning scanning() {
+        return NoOpPlatformScanning.INSTANCE; //TODO: implement scanning
     }
 }

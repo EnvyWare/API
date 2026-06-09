@@ -7,6 +7,7 @@ import com.envyful.api.config.type.ConfigItem;
 import com.envyful.api.platform.text.TextFormatter;
 import com.envyful.api.player.EnvyPlayer;
 import com.envyful.api.player.PlayerManager;
+import com.envyful.api.scanning.PlatformScanning;
 import com.envyful.api.text.Placeholder;
 
 import java.util.Collection;
@@ -480,6 +481,15 @@ public class PlatformProxy {
      */
     public static String strip(String text) {
         return textFormatter.strip(text);
+    }
+
+    public static PlatformScanning scanning() {
+        if (handler == null) {
+            UtilLogger.getLogger().error("No platform handler set but scanning was called");
+            return null;
+        }
+
+        return handler.scanning();
     }
 
 }

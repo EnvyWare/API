@@ -3,6 +3,7 @@ package com.envyful.api.platform;
 import com.envyful.api.config.ConfigToast;
 import com.envyful.api.config.type.ConfigItem;
 import com.envyful.api.player.EnvyPlayer;
+import com.envyful.api.scanning.PlatformScanning;
 import com.envyful.api.text.Placeholder;
 
 import java.util.Collection;
@@ -128,4 +129,11 @@ public interface PlatformHandler<A> {
      */
     boolean isItem(Object itemStack, ConfigItem item);
 
+    /**
+     *
+     * Gets the platform scanning instance
+     *
+     * @return The platform scanning instance
+     */
+    PlatformScanning scanning();
 }

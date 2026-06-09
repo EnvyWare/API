@@ -1,4 +1,4 @@
-package com.envyful.api.neoforge;
+package com.envyful.api;
 
 /**
  *
