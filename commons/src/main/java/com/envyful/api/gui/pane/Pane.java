@@ -1,6 +1,7 @@
 package com.envyful.api.gui.pane;
 
 import com.envyful.api.config.type.ConfigInterface;
+import com.envyful.api.config.type.item.MenuPosition;
 import com.envyful.api.gui.Gui;
 import com.envyful.api.gui.factory.GuiFactory;
 import com.envyful.api.gui.item.Displayable;
@@ -36,6 +37,10 @@ public interface Pane {
      * @param displayable The item to display at X and Y
      */
     void set(int posX, int posY, Displayable displayable);
+
+    default void set(MenuPosition position, Displayable displayable) {
+        this.set(position.x(), position.y(), displayable);
+    }
 
     /**
      *

@@ -104,6 +104,42 @@ public class ConfigItem {
         return PlatformProxy.isItem(itemStack, this);
     }
 
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setFlags(List<String> flags) {
+        this.flags = flags;
+    }
+
+    public void setLore(List<String> lore) {
+        this.lore = lore;
+    }
+
+    public void setEnchants(Map<String, EnchantData> enchants) {
+        this.enchants = enchants;
+    }
+
+    public void setNbt(Map<String, NBTValue> nbt) {
+        this.nbt = nbt;
+    }
+
+    public void setComponents(CommentedConfigurationNode components) {
+        this.components = components;
+    }
+
     public static Builder builder() {
         return new Builder();
     }

@@ -8,10 +8,10 @@ import java.util.List;
 
 public class ComposedPlaceholder implements Placeholder {
 
-    private final List<Placeholder> placeholders;
+    protected final List<Placeholder> placeholders;
 
-    private ComposedPlaceholder(List<Placeholder> placeholders) {
-        this.placeholders = placeholders;
+    protected ComposedPlaceholder(List<Placeholder> placeholders) {
+        this.placeholders = List.copyOf(placeholders);
     }
 
     public static Placeholder of(List<Placeholder> placeholders) {
