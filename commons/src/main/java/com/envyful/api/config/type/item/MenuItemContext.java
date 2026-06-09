@@ -21,6 +21,10 @@ public class MenuItemContext extends ComposedPlaceholder {
         this.player = player;
     }
 
+    public static MenuItemContext of(EnvyPlayer<?> player, Placeholder... placeholders) {
+        return new MenuItemContext(player, placeholders);
+    }
+
     private static List<Placeholder> compilePlaceholders(EnvyPlayer<?> player, List<Placeholder> placeholders) {
         var list = new ArrayList<Placeholder>(placeholders.size() + 1);
         list.addAll(placeholders);
