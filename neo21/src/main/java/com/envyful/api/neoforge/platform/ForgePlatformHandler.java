@@ -1,6 +1,7 @@
 package com.envyful.api.neoforge.platform;
 
 import com.envyful.api.InitializationTask;
+import com.envyful.api.concurrency.UtilConcurrency;
 import com.envyful.api.concurrency.UtilLogger;
 import com.envyful.api.config.ConfigToast;
 import com.envyful.api.config.type.ConfigItem;
@@ -44,23 +45,25 @@ public class ForgePlatformHandler extends StandardPlatformHandler<CommandSource>
     private static final ForgePlatformHandler INSTANCE = new ForgePlatformHandler();
 
     protected ForgePlatformHandler() {
-        ModList.get().getAllScanData().stream()
-                .map(ModFileScanData::getClasses)
-                .flatMap(Collection::stream)
-                .filter(classData -> classData.interfaces().contains(Type.getType(InitializationTask.class)))
-                .forEach(classData -> {
-                    try {
-                        var clazz = Class.forName(classData.clazz().getClassName());
-                        var constructor = clazz.getConstructor();
-                        var initializationTask = (InitializationTask) constructor.newInstance();
+        UtilConcurrency.runLater(() -> {
+            ModList.get().getAllScanData().stream()
+                    .map(ModFileScanData::getClasses)
+                    .flatMap(Collection::stream)
+                    .filter(classData -> classData.interfaces().contains(Type.getType(InitializationTask.class)))
+                    .forEach(classData -> {
+                        try {
+                            var clazz = Class.forName(classData.clazz().getClassName());
+                            var constructor = clazz.getConstructor();
+                            var initializationTask = (InitializationTask) constructor.newInstance();
 
-                        initializationTask.run();
-                    } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
-                             IllegalAccessException | IllegalArgumentException |
-                             InvocationTargetException e) {
-                        UtilLogger.getLogger().error("Error loading class", e);
-                    }
-                });
+                            initializationTask.run();
+                        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                                 IllegalAccessException | IllegalArgumentException |
+                                 InvocationTargetException e) {
+                            UtilLogger.getLogger().error("Error loading class", e);
+                        }
+                    });
+        }, 20L);
     }
 
     public static PlatformHandler<CommandSource> getInstance() {
