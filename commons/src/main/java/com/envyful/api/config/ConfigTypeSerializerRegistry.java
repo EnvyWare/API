@@ -22,6 +22,10 @@ public class ConfigTypeSerializerRegistry {
     }
 
     public static List<ConfigTypeSerializer<?>> getAll() {
+        if (REGISTRY.isEmpty()) {
+            return List.of();
+        }
+
         return List.copyOf(REGISTRY.values());
     }
 }
