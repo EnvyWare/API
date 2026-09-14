@@ -30,37 +30,35 @@ public class SpriteConfig {
 
     public static final SpriteConfig DEFAULT = new SpriteConfig();
 
+    private static final BattleStatsType[] IV_BAR_ORDER = {
+            BattleStatsType.HP, BattleStatsType.ATTACK, BattleStatsType.DEFENSE,
+            BattleStatsType.SPECIAL_ATTACK, BattleStatsType.SPECIAL_DEFENSE, BattleStatsType.SPEED
+    };
+
     private String name = "&b%species_name% %nickname%";
     private String eggName = "Egg";
 
     private List<String> lore = Lists.newArrayList(
-            "&7Level: &b%level%",
-            "&7Shiny: &b%shiny%",
-            "&7Palette: &b%palette%",
-            "&7Gender: %gender%",
-            "&7Breedable: %breedable%",
-            "&7Friendship: %friendship%",
-            "&7Nature: &b%nature%",
-            "&7Form: &b%form%",
-            "&7Growth: &b%size%",
-            "&7Ability: &b%ability_name%%ability_ha%",
-            "&7Friendship: &b%friendship%",
-            "&7Untradeable: &b%untradeable%",
+            "&7Lv.&f%level% &8| &7%type%",
+            "%gender%",
             " ",
-            "&7IVs (&b%iv_percentage%%&7):",
-            "    §7HP: %iv_hp% §d| §7Atk: %iv_attack% §d| §7Def: %iv_defence%",
-            "    §7SAtk: %iv_spattack% §d| §7SDef: %iv_spdefence% §d| §7Spd: %iv_speed%",
+            "&7Nature &f%nature%%nature_effects%",
+            "&7Ability &f%ability_name%%ability_ha%",
+            "&7Held &f%held_item%",
+            "&7Palette &f%palette%",
+            "&7Form &f%form%",
+            "%shiny%",
+            "%gmaxfactor%",
             " ",
-            "&7EVs:",
-            "    §7HP: &b%ev_hp% §d| §7Atk: &b%ev_attack% §d| §7Def: &b%ev_defence%",
-            "    §7SAtk: &b%ev_spattack% §d| §7SDef: &b%ev_spdefence% §d| §7Spd: &b%ev_speed%",
+            "&7IVs &e%iv_percentage%%&8 | %ivs%",
+            "    %iv_bar% &8hp atk def spa spd spe",
+            "&7Moves &f%moves_line%",
             " ",
-            "&7Moves:",
-            "    &b%move_1%",
-            "    &b%move_2%",
-            "    &b%move_3%",
-            "    &b%move_4%",
-            " ",
+            "&8Friendship %friendship%&8   Growth %growth_name%",
+            "&8EVs %evs%",
+            "&8Trainer %original_trainer%",
+            "%breedable%",
+            "%untradeable%",
             "%mew_cloned%",
             "%trio_gemmed%"
     );
@@ -71,27 +69,38 @@ public class SpriteConfig {
             "&aEgg Description: %egg_description%"
     );
 
-    private String untradeableTrueFormat = "&aTRUE";
-    private String untradeableFalseFormat = "&cFALSE";
+    private String untradeableTrueFormat = "&cUntradeable";
+    private String untradeableFalseFormat = "&aTradeable";
     private String haFormat = " &7(&c&lHA&7)";
     private String notHaFormat = "";
     private String maleFormat = "&bMale";
     private String femaleFormat = "&dFemale";
     private String noneFormat = "&fNONE";
-    private String shinyTrueFormat = "&aTRUE";
-    private String shinyFalseFormat = "&cFALSE";
-    private String breedableTrueFormat = "&aTRUE";
-    private String breedableFalseFormat = "&cFALSE";
+    private String shinyTrueFormat = "&e★ Shiny";
+    private String shinyFalseFormat = "";
+    private String breedableTrueFormat = "&aBreedable";
+    private String breedableFalseFormat = "&cUnbreedable";
     private String mewClonedFormat = "&7Times Cloned: %cloned%";
     private String gemmedFormat = "&7Gemmed: %gemmed%";
-    private String natureFormat = "%nature_name% %mint_nature%";
-    private String mintNatureFormat = "&7(%mint_nature_name%&7)";
+    private String natureFormat = "%nature_name%%mint_nature%";
+    private String mintNatureFormat = " &7(%mint_nature_name%&7)";
     private String normalIvColour = "&b";
     private String hyperIvColour = "&e";
-    private String gmaxFactorTrueFormat = "&aTRUE";
-    private String gmaxFactorFalseFormat = "&cFALSE";
+    private String gmaxFactorTrueFormat = "&dGigantamax Factor";
+    private String gmaxFactorFalseFormat = "";
     private String emptyMoveSlot = "&7Empty";
     private boolean removeEmptyMoveSlots = true;
+    private boolean removeAbsentFields = true;
+    private String moveSeparator = "&7, ";
+    private String typeSeparator = "&7 / ";
+    private String statSeparator = "&8/";
+    private String natureIncreasedFormat = " &a+%stat%";
+    private String natureDecreasedFormat = "&c-%stat%";
+    private String ivBarGlyph = "█";
+    private String ivBarPerfectColour = "&e";
+    private String ivBarHighColour = "&a";
+    private String ivBarMediumColour = "&9";
+    private String ivBarLowColour = "&8";
 
     public SpriteConfig() {}
 
@@ -170,12 +179,12 @@ public class SpriteConfig {
 
         placeholders.add(Placeholder.simple("%species_name%", pokemon.getSpecies().getLocalizedName()));
         placeholders.add(Placeholder.simple("%nickname%", pokemon.getNickname().getString()));
-        placeholders.add(Placeholder.simple("%held_item%", pokemon.getHeldItem().getHoverName().getString()));
+        placeholders.add(this.optional("%held_item%", !pokemon.getHeldItem().isEmpty(), pokemon.getHeldItem().getHoverName().getString()));
         placeholders.add(Placeholder.simple("%type%", getType(pokemon)));
-        placeholders.add(Placeholder.simple("%palette%", pokemon.getPalette().getLocalizedName()));
+        placeholders.add(this.optional("%palette%", !"none".equalsIgnoreCase(pokemon.getPalette().getName()), pokemon.getPalette().getLocalizedName()));
         placeholders.add(Placeholder.simple("%level%", pokemon.getPokemonLevel()));
         placeholders.add(this.getGenderPlaceholder(pokemon));
-        placeholders.add(Placeholder.simple("%breedable%", !pokemon.hasFlag(Flags.UNBREEDABLE) ? this.breedableTrueFormat : this.breedableFalseFormat));
+        placeholders.add(this.optional("%breedable%", pokemon.hasFlag(Flags.UNBREEDABLE), !pokemon.hasFlag(Flags.UNBREEDABLE) ? this.breedableTrueFormat : this.breedableFalseFormat));
         placeholders.add(Placeholder.simple("%nature%", this.natureFormat.replace("%nature_name%",
                         pokemon.getMintNature() != null ?
                                 pokemon.getBaseNature().getLocalizedName() :
@@ -185,7 +194,7 @@ public class SpriteConfig {
         placeholders.add(Placeholder.simple("%ability_name%", pokemon.getAbility().getLocalizedName()));
         placeholders.add(Placeholder.simple("%ability_ha%", pokemon.hasHiddenAbility() ? this.haFormat : this.notHaFormat));
         placeholders.add(Placeholder.simple("%friendship%", pokemon.getFriendship()));
-        placeholders.add(Placeholder.simple("%untradeable%", pokemon.isUntradeable() ? this.untradeableTrueFormat : this.untradeableFalseFormat));
+        placeholders.add(this.optional("%untradeable%", pokemon.isUntradeable(), pokemon.isUntradeable() ? this.untradeableTrueFormat : this.untradeableFalseFormat));
         placeholders.add(Placeholder.simple("%iv_percentage%", percentage));
         placeholders.add(Placeholder.simple("%iv_hp%", getColour(iVs, BattleStatsType.HP) + ivHP));
         placeholders.add(Placeholder.simple("%iv_attack%", getColour(iVs, BattleStatsType.ATTACK) + ivAtk));
@@ -203,11 +212,17 @@ public class SpriteConfig {
         placeholders.add(getMovePlaceholder(pokemon, 1));
         placeholders.add(getMovePlaceholder(pokemon, 2));
         placeholders.add(getMovePlaceholder(pokemon, 3));
-        placeholders.add(Placeholder.simple("%shiny%", pokemon.isShiny() ? this.shinyTrueFormat : this.shinyFalseFormat));
-        placeholders.add(Placeholder.simple("%form%", pokemon.getForm().getLocalizedName()));
+        placeholders.add(this.optional("%shiny%", pokemon.isShiny(), pokemon.isShiny() ? this.shinyTrueFormat : this.shinyFalseFormat));
+        placeholders.add(this.optional("%form%", !pokemon.getForm().getName().equals(pokemon.getSpecies().getDefaultForm().getName()), pokemon.getForm().getLocalizedName()));
         placeholders.add(Placeholder.simple("%size%", String.format("%.2f", pokemon.getSize())));
-        placeholders.add(Placeholder.simple("%friendship%", pokemon.getFriendship() + ""));
-        placeholders.add(Placeholder.simple("%gmaxfactor%", pokemon.hasGigantamaxFactor() ? this.gmaxFactorTrueFormat : this.gmaxFactorFalseFormat));
+        placeholders.add(Placeholder.simple("%growth_name%", pokemon.getGrowth().value().getName().getString()));
+        placeholders.add(Placeholder.simple("%iv_bar%", this.getIvBar(iVs)));
+        placeholders.add(Placeholder.simple("%ivs%", this.getIvs(iVs)));
+        placeholders.add(this.optional("%evs%", (evHP + evAtk + evDef + evSAtk + evSDef + evSpeed) > 0,
+                String.join(this.statSeparator, "&f" + evHP, "&f" + evAtk, "&f" + evDef, "&f" + evSAtk, "&f" + evSDef, "&f" + evSpeed)));
+        placeholders.add(this.getNatureEffectsPlaceholder(pokemon));
+        placeholders.add(this.getMovesLinePlaceholder(pokemon));
+        placeholders.add(this.optional("%gmaxfactor%", pokemon.hasGigantamaxFactor(), pokemon.hasGigantamaxFactor() ? this.gmaxFactorTrueFormat : this.gmaxFactorFalseFormat));
         placeholders.add(
                 Placeholder.require(() -> pokemon.getOriginalTrainer() != null)
                         .placeholder(Placeholder.simple("%original_trainer%", pokemon.getOriginalTrainer()))
@@ -259,18 +274,120 @@ public class SpriteConfig {
             return Placeholder.simple("%gender%", this.femaleFormat);
         }
 
-        return Placeholder.simple("%gender%", this.noneFormat);
+        return this.optional("%gender%", false, this.noneFormat);
+    }
+
+    /**
+     *
+     * Absent values either render their "nothing here" text or drop the whole
+     * lore line, depending on removeAbsentFields. Dropping is done by returning
+     * a null replacement, which PlaceholderFactory treats as "delete this line"
+     *
+     */
+    private Placeholder optional(String key, boolean present, String value) {
+        if (!present && this.removeAbsentFields) {
+            return Placeholder.empty(key);
+        }
+
+        return Placeholder.simple(key, value);
+    }
+
+    private String getIvBar(IVStore ivStore) {
+        var bar = new StringBuilder();
+
+        for (var statsType : IV_BAR_ORDER) {
+            bar.append(this.getBarColour(ivStore.getStat(statsType))).append(this.ivBarGlyph);
+        }
+
+        return bar.toString();
+    }
+
+    private String getIvs(IVStore ivStore) {
+        List<String> stats = new ArrayList<>();
+
+        for (var statsType : IV_BAR_ORDER) {
+            var iv = ivStore.getStat(statsType);
+            stats.add(this.getBarColour(iv) + iv);
+        }
+
+        return String.join(this.statSeparator, stats);
+    }
+
+    private String getBarColour(int iv) {
+        if (iv >= 31) {
+            return this.ivBarPerfectColour;
+        }
+
+        if (iv >= 26) {
+            return this.ivBarHighColour;
+        }
+
+        if (iv >= 16) {
+            return this.ivBarMediumColour;
+        }
+
+        return this.ivBarLowColour;
+    }
+
+    /**
+     *
+     * Neutral natures raise and lower the same stat, so they get no line rather
+     * than a pair that cancels itself out. A mint overrides the original
+     *
+     */
+    private Placeholder getNatureEffectsPlaceholder(Pokemon pokemon) {
+        var nature = pokemon.getMintNature() != null ? pokemon.getMintNature() : pokemon.getNature();
+
+        if (nature == null || nature.getIncreasedStat() == nature.getDecreasedStat()) {
+            return Placeholder.simple("%nature_effects%", "");
+        }
+
+        return Placeholder.simple("%nature_effects%",
+                this.natureIncreasedFormat.replace("%stat%", abbreviate(nature.getIncreasedStat()))
+                        + " "
+                        + this.natureDecreasedFormat.replace("%stat%", abbreviate(nature.getDecreasedStat())));
+    }
+
+    /**
+     *
+     * Joins the moves the Pokemon actually has, so an empty slot cannot leave a
+     * dangling separator the way "%move_1%, %move_2%" in the lore would
+     *
+     */
+    private Placeholder getMovesLinePlaceholder(Pokemon pokemon) {
+        List<String> moves = new ArrayList<>();
+
+        for (int pos = 0; pos < 4; pos++) {
+            var move = this.getMove(pokemon, pos);
+
+            if (!move.isEmpty()) {
+                moves.add(move);
+            }
+        }
+
+        return this.optional("%moves_line%", !moves.isEmpty(), String.join(this.moveSeparator, moves));
+    }
+
+    private static String abbreviate(BattleStatsType statsType) {
+        return switch (statsType) {
+            case HP -> "HP";
+            case ATTACK -> "ATK";
+            case DEFENSE -> "DEF";
+            case SPECIAL_ATTACK -> "SPA";
+            case SPECIAL_DEFENSE -> "SPD";
+            case SPEED -> "SPE";
+            default -> statsType.name();
+        };
     }
 
     private String getType(Pokemon pokemon) {
-        var types = pokemon.getForm().getTypes();
-        var typeInfo = new StringBuilder();
+        List<String> types = new ArrayList<>();
 
-        for (var type : types) {
-            typeInfo.append(type.value().name().getString()).append(" ");
+        for (var type : pokemon.getForm().getTypes()) {
+            types.add(type.value().name().getString());
         }
 
-        return typeInfo.toString();
+        return String.join(this.typeSeparator, types);
     }
 
     private String getColour(IVStore ivStore, BattleStatsType statsType) {
@@ -428,6 +545,49 @@ public class SpriteConfig {
 
         public Builder gmaxFactorFalseFormat(String gmaxFactorFalseFormat) {
             this.config.gmaxFactorFalseFormat = gmaxFactorFalseFormat;
+            return this;
+        }
+
+        public Builder removeAbsentFields(boolean removeAbsentFields) {
+            this.config.removeAbsentFields = removeAbsentFields;
+            return this;
+        }
+
+        public Builder moveSeparator(String moveSeparator) {
+            this.config.moveSeparator = moveSeparator;
+            return this;
+        }
+
+        public Builder natureIncreasedFormat(String natureIncreasedFormat) {
+            this.config.natureIncreasedFormat = natureIncreasedFormat;
+            return this;
+        }
+
+        public Builder natureDecreasedFormat(String natureDecreasedFormat) {
+            this.config.natureDecreasedFormat = natureDecreasedFormat;
+            return this;
+        }
+
+        public Builder typeSeparator(String typeSeparator) {
+            this.config.typeSeparator = typeSeparator;
+            return this;
+        }
+
+        public Builder statSeparator(String statSeparator) {
+            this.config.statSeparator = statSeparator;
+            return this;
+        }
+
+        public Builder ivBarGlyph(String ivBarGlyph) {
+            this.config.ivBarGlyph = ivBarGlyph;
+            return this;
+        }
+
+        public Builder ivBarColours(String perfect, String high, String medium, String low) {
+            this.config.ivBarPerfectColour = perfect;
+            this.config.ivBarHighColour = high;
+            this.config.ivBarMediumColour = medium;
+            this.config.ivBarLowColour = low;
             return this;
         }
 
