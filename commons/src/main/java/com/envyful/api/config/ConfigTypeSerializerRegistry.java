@@ -1,8 +1,6 @@
 package com.envyful.api.config;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -14,6 +12,7 @@ public class ConfigTypeSerializerRegistry {
     private static final Map<Class<?>, ConfigTypeSerializer<?>> REGISTRY = new HashMap<>();
 
     public static void register(ConfigTypeSerializer<?> serializer) {
+        Objects.requireNonNull(serializer, "serializer");
         REGISTRY.put(serializer.clazz(), serializer);
     }
 
@@ -26,6 +25,6 @@ public class ConfigTypeSerializerRegistry {
             return List.of();
         }
 
-        return List.copyOf(REGISTRY.values());
+        return new ArrayList<>(REGISTRY.values());
     }
 }
