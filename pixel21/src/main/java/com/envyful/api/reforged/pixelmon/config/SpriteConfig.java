@@ -52,7 +52,7 @@ public class SpriteConfig {
             "&7Held &f%held_item%",
             "%gmaxfactor%",
             " ",
-            "&7IVs &e%iv_percentage%%&8 | %ivs%",
+            "&7IVs %iv_percentage%%&8 | %ivs%",
             "    %iv_bar% &8hp atk def spa spd spe",
             "&7Moves &f%moves_line%",
             " ",
@@ -116,7 +116,8 @@ public class SpriteConfig {
         List<Component> lore = PlaceholderFactory.handlePlaceholders(this.lore, PlatformProxy::parse, allPlaceholders.toArray(new Placeholder[0]));
 
         UtilItemStack.setLore(itemStack, lore);
-        UtilItemStack.setName(itemStack, PlatformProxy.flatParse(this.name, placeholders));
+        Component speciesName = PlatformProxy.flatParse(this.name, placeholders);
+        UtilItemStack.setName(itemStack, speciesName.copy().withStyle(style -> style.withItalic(false)));
 
         return itemStack;
     }
@@ -126,7 +127,8 @@ public class SpriteConfig {
         var placeholders = this.getPokemonPlaceholders(pokemon, additionalPlaceholders);
 
         UtilItemStack.setLore(itemStack, this.getLore(pokemon, placeholders));
-        UtilItemStack.setName(itemStack, PlatformProxy.flatParse(pokemon.isEgg() ? this.eggName : this.name, placeholders));
+        Component name = PlatformProxy.flatParse(pokemon.isEgg() ? this.eggName : this.name, placeholders);
+        UtilItemStack.setName(itemStack, name.copy().withStyle(style -> style.withItalic(false)));
 
         return itemStack;
     }
@@ -156,11 +158,22 @@ public class SpriteConfig {
                     continue;
                 }
 
-                lore.add(PlatformProxy.parse(rendered));
+                lore.add(this.parseUnstyled(rendered));
             }
         }
 
         return lore;
+    }
+
+    /**
+     *
+     * Vanilla merges an italic style into every lore line and custom name, and
+     * only fills in what we leave unset, so italic has to be explicitly false
+     *
+     */
+    private Component parseUnstyled(String text) {
+        Component parsed = PlatformProxy.parse(text);
+        return parsed.copy().withStyle(style -> style.withItalic(false));
     }
 
     private static String strip(String text) {
@@ -233,7 +246,7 @@ public class SpriteConfig {
         placeholders.add(Placeholder.simple("%ability_ha%", pokemon.hasHiddenAbility() ? this.haFormat : this.notHaFormat));
         placeholders.add(Placeholder.simple("%friendship%", pokemon.getFriendship()));
         placeholders.add(this.optional("%untradeable%", pokemon.isUntradeable(), pokemon.isUntradeable() ? this.untradeableTrueFormat : this.untradeableFalseFormat));
-        placeholders.add(Placeholder.simple("%iv_percentage%", percentage));
+        placeholders.add(Placeholder.simple("%iv_percentage%", this.getPercentageColour(percentage) + percentage));
         placeholders.add(Placeholder.simple("%iv_hp%", getColour(iVs, BattleStatsType.HP) + ivHP));
         placeholders.add(Placeholder.simple("%iv_attack%", getColour(iVs, BattleStatsType.ATTACK) + ivAtk));
         placeholders.add(Placeholder.simple("%iv_defence%", getColour(iVs, BattleStatsType.DEFENSE) + ivDef));
@@ -350,6 +363,22 @@ public class SpriteConfig {
         }
 
         return String.join(this.statSeparator, stats);
+    }
+
+    private String getPercentageColour(int percentage) {
+        if (percentage >= 90) {
+            return this.ivBarPerfectColour;
+        }
+
+        if (percentage >= 70) {
+            return this.ivBarHighColour;
+        }
+
+        if (percentage >= 50) {
+            return this.ivBarMediumColour;
+        }
+
+        return this.ivBarLowColour;
     }
 
     private String getBarColour(int iv) {
