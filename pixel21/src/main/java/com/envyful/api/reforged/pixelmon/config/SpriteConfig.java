@@ -14,6 +14,7 @@ import com.pixelmonmod.pixelmon.api.pokemon.species.Stats;
 import com.pixelmonmod.pixelmon.api.pokemon.species.gender.Gender;
 import com.pixelmonmod.pixelmon.api.pokemon.species.palette.PaletteProperties;
 import com.pixelmonmod.pixelmon.api.pokemon.stats.BattleStatsType;
+import com.pixelmonmod.pixelmon.api.pokemon.stats.EVStore;
 import com.pixelmonmod.pixelmon.api.pokemon.stats.IVStore;
 import com.pixelmonmod.pixelmon.api.pokemon.stats.extraStats.LakeTrioStats;
 import com.pixelmonmod.pixelmon.api.pokemon.stats.extraStats.MewStats;
@@ -56,6 +57,7 @@ public class SpriteConfig {
             "&7IVs %iv_percentage%%&7 | %ivs%",
             "    %iv_bar% &7hp atk def spa spd spe",
             "&7EVs  %ev_percentage%%&7 | %evs%",
+            "    %ev_bar%",
             "%moves_line%",
             " ",
             "&7Trainer &f%original_trainer%",
@@ -276,6 +278,7 @@ public class SpriteConfig {
         var evTotal = evHP + evAtk + evDef + evSAtk + evSDef + evSpeed;
         placeholders.add(this.optional("%evs%", evTotal > 0, String.join(this.statSeparator,
                 this.ev(evHP), this.ev(evAtk), this.ev(evDef), this.ev(evSAtk), this.ev(evSDef), this.ev(evSpeed))));
+        placeholders.add(this.optional("%ev_bar%", evTotal > 0, this.getEvBar(pokemon.getEVs())));
         placeholders.add(this.optional("%ev_percentage%", evTotal > 0,
                 this.getPercentageColour(Math.round((evTotal / 510f) * 100)) + Math.round((evTotal / 510f) * 100)));
         placeholders.add(this.getNatureEffectsPlaceholder(pokemon));
@@ -369,6 +372,16 @@ public class SpriteConfig {
         }
 
         return String.join(this.statSeparator, stats);
+    }
+
+    private String getEvBar(EVStore evStore) {
+        var bar = new StringBuilder();
+
+        for (var statsType : IV_BAR_ORDER) {
+            bar.append(this.getEvColour(evStore.getStat(statsType))).append(this.ivBarGlyph);
+        }
+
+        return bar.toString();
     }
 
     private String ev(int ev) {
