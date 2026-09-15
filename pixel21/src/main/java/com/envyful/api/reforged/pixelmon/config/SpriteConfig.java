@@ -24,11 +24,15 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @ConfigSerializable
 public class SpriteConfig {
 
     public static final SpriteConfig DEFAULT = new SpriteConfig();
+
+    private static final Pattern PLACEHOLDER = Pattern.compile("%[a-zA-Z0-9_]+%");
+    private static final Pattern FORMATTING = Pattern.compile("[&§](#[0-9a-fA-F]{6}|[0-9a-zA-Z])");
 
     private static final BattleStatsType[] IV_BAR_ORDER = {
             BattleStatsType.HP, BattleStatsType.ATTACK, BattleStatsType.DEFENSE,
@@ -39,15 +43,13 @@ public class SpriteConfig {
     private String eggName = "Egg";
 
     private List<String> lore = Lists.newArrayList(
-            "&7Lv.&f%level% &8| &7%type%",
-            "%gender%",
+            "&7Lv.&f%level%%gender%%shiny%",
+            "&7%type%",
+            "&7%variant%",
             " ",
             "&7Nature &f%nature%%nature_effects%",
             "&7Ability &f%ability_name%%ability_ha%",
             "&7Held &f%held_item%",
-            "&7Palette &f%palette%",
-            "&7Form &f%form%",
-            "%shiny%",
             "%gmaxfactor%",
             " ",
             "&7IVs &e%iv_percentage%%&8 | %ivs%",
@@ -73,10 +75,10 @@ public class SpriteConfig {
     private String untradeableFalseFormat = "&aTradeable";
     private String haFormat = " &7(&c&lHA&7)";
     private String notHaFormat = "";
-    private String maleFormat = "&bMale";
-    private String femaleFormat = "&dFemale";
-    private String noneFormat = "&fNONE";
-    private String shinyTrueFormat = "&e★ Shiny";
+    private String maleFormat = " &bMale";
+    private String femaleFormat = " &dFemale";
+    private String noneFormat = " &fNONE";
+    private String shinyTrueFormat = " &e★";
     private String shinyFalseFormat = "";
     private String breedableTrueFormat = "&aBreedable";
     private String breedableFalseFormat = "&cUnbreedable";
@@ -93,6 +95,7 @@ public class SpriteConfig {
     private boolean removeAbsentFields = true;
     private String moveSeparator = "&7, ";
     private String typeSeparator = "&7 / ";
+    private String variantSeparator = "&8 / ";
     private String statSeparator = "&8/";
     private String natureIncreasedFormat = " &a+%stat%";
     private String natureDecreasedFormat = "&c-%stat%";
@@ -133,12 +136,35 @@ public class SpriteConfig {
         return this.getLore(pokemon, placeholders);
     }
 
+    /**
+     *
+     * A line is dropped only when every placeholder on it rendered to nothing,
+     * which is what lets an optional field either own a line or sit inline
+     * beside something else. A line with no placeholders at all is a deliberate
+     * spacer and always survives
+     *
+     */
     protected List<Component> getLore(Pokemon pokemon, Placeholder... placeholders) {
-        if (pokemon.isEgg()) {
-            return PlaceholderFactory.handlePlaceholders(this.eggLore, PlatformProxy::parse, placeholders);
+        List<Component> lore = new ArrayList<>();
+
+        for (var line : pokemon.isEgg() ? this.eggLore : this.lore) {
+            var skeleton = strip(PLACEHOLDER.matcher(line).replaceAll(""));
+            var hasPlaceholder = PLACEHOLDER.matcher(line).find();
+
+            for (var rendered : PlaceholderFactory.handlePlaceholders(line, placeholders)) {
+                if (hasPlaceholder && strip(rendered).equals(skeleton)) {
+                    continue;
+                }
+
+                lore.add(PlatformProxy.parse(rendered));
+            }
         }
 
-        return PlaceholderFactory.handlePlaceholders(this.lore, PlatformProxy::parse, placeholders);
+        return lore;
+    }
+
+    private static String strip(String text) {
+        return FORMATTING.matcher(text).replaceAll("").replaceAll("\\s+", " ").trim();
     }
 
     public Placeholder getPokemonPlaceholders(Species species, Stats form, Gender gender, PaletteProperties palette, Placeholder... additionalPlaceholders) {
@@ -168,6 +194,18 @@ public class SpriteConfig {
         var evSDef = pokemon.getEVs().getStat(BattleStatsType.SPECIAL_DEFENSE);
         var extraStats = pokemon.getExtraStats();
 
+        var hasForm = !pokemon.getForm().getName().equals(pokemon.getSpecies().getDefaultForm().getName());
+        var hasPalette = !"none".equalsIgnoreCase(pokemon.getPalette().getName());
+        List<String> variant = new ArrayList<>();
+
+        if (hasForm) {
+            variant.add(pokemon.getForm().getLocalizedName());
+        }
+
+        if (hasPalette) {
+            variant.add(pokemon.getPalette().getLocalizedName());
+        }
+
         List<Placeholder> placeholders = new ArrayList<>(Arrays.asList(otherPlaceholders));
 
         if (pokemon.isEgg()) {
@@ -181,7 +219,7 @@ public class SpriteConfig {
         placeholders.add(Placeholder.simple("%nickname%", pokemon.getNickname().getString()));
         placeholders.add(this.optional("%held_item%", !pokemon.getHeldItem().isEmpty(), pokemon.getHeldItem().getHoverName().getString()));
         placeholders.add(Placeholder.simple("%type%", getType(pokemon)));
-        placeholders.add(this.optional("%palette%", !"none".equalsIgnoreCase(pokemon.getPalette().getName()), pokemon.getPalette().getLocalizedName()));
+        placeholders.add(this.optional("%palette%", hasPalette, pokemon.getPalette().getLocalizedName()));
         placeholders.add(Placeholder.simple("%level%", pokemon.getPokemonLevel()));
         placeholders.add(this.getGenderPlaceholder(pokemon));
         placeholders.add(this.optional("%breedable%", pokemon.hasFlag(Flags.UNBREEDABLE), !pokemon.hasFlag(Flags.UNBREEDABLE) ? this.breedableTrueFormat : this.breedableFalseFormat));
@@ -213,7 +251,8 @@ public class SpriteConfig {
         placeholders.add(getMovePlaceholder(pokemon, 2));
         placeholders.add(getMovePlaceholder(pokemon, 3));
         placeholders.add(this.optional("%shiny%", pokemon.isShiny(), pokemon.isShiny() ? this.shinyTrueFormat : this.shinyFalseFormat));
-        placeholders.add(this.optional("%form%", !pokemon.getForm().getName().equals(pokemon.getSpecies().getDefaultForm().getName()), pokemon.getForm().getLocalizedName()));
+        placeholders.add(this.optional("%form%", hasForm, pokemon.getForm().getLocalizedName()));
+        placeholders.add(this.optional("%variant%", !variant.isEmpty(), String.join(this.variantSeparator, variant)));
         placeholders.add(Placeholder.simple("%size%", String.format("%.2f", pokemon.getSize())));
         placeholders.add(Placeholder.simple("%growth_name%", pokemon.getGrowth().value().getName().getString()));
         placeholders.add(Placeholder.simple("%iv_bar%", this.getIvBar(iVs)));
@@ -226,7 +265,7 @@ public class SpriteConfig {
         placeholders.add(
                 Placeholder.require(() -> pokemon.getOriginalTrainer() != null)
                         .placeholder(Placeholder.simple("%original_trainer%", pokemon.getOriginalTrainer()))
-                        .elsePlaceholder(Placeholder.empty("%original_trainer%"))
+                        .elsePlaceholder(Placeholder.simple("%original_trainer%", ""))
                         .build()
         );
 
@@ -255,7 +294,7 @@ public class SpriteConfig {
 
     public Placeholder getGenderPlaceholder(Pokemon pokemon) {
         if (pokemon == null) {
-            return Placeholder.empty("%gender%");
+            return Placeholder.simple("%gender%", "");
         }
 
         return getGenderPlaceholder(pokemon.getGender());
@@ -263,7 +302,7 @@ public class SpriteConfig {
 
     public Placeholder getGenderPlaceholder(Gender gender) {
         if (gender == null) {
-            return Placeholder.empty("%gender%");
+            return Placeholder.simple("%gender%", "");
         }
 
         if (gender == Gender.MALE) {
@@ -286,7 +325,7 @@ public class SpriteConfig {
      */
     private Placeholder optional(String key, boolean present, String value) {
         if (!present && this.removeAbsentFields) {
-            return Placeholder.empty(key);
+            return Placeholder.simple(key, "");
         }
 
         return Placeholder.simple(key, value);
@@ -570,6 +609,11 @@ public class SpriteConfig {
 
         public Builder typeSeparator(String typeSeparator) {
             this.config.typeSeparator = typeSeparator;
+            return this;
+        }
+
+        public Builder variantSeparator(String variantSeparator) {
+            this.config.variantSeparator = variantSeparator;
             return this;
         }
 
