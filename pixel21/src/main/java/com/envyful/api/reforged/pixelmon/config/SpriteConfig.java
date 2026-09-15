@@ -51,10 +51,9 @@ public class SpriteConfig {
             "&7Ability &f%ability_name%%ability_ha%",
             "&7Held &f%held_item%",
             "%gmaxfactor%",
-            " ",
             "&7IVs %iv_percentage%%&8 | %ivs%",
             "    %iv_bar% &8hp atk def spa spd spe",
-            "&7Moves &f%moves_line%",
+            "%moves_line%",
             " ",
             "&8Friendship %friendship%&8   Growth %growth_name%",
             "&8EVs %evs%",
@@ -94,6 +93,9 @@ public class SpriteConfig {
     private boolean removeEmptyMoveSlots = true;
     private boolean removeAbsentFields = true;
     private String moveSeparator = "&7, ";
+    private int movesPerLine = 2;
+    private String movesFormat = "&7Moves &f%moves%";
+    private String movesContinuationFormat = "&7      &f%moves%";
     private String typeSeparator = "&7 / ";
     private String variantSeparator = "&8 / ";
     private String statSeparator = "&8/";
@@ -433,7 +435,24 @@ public class SpriteConfig {
             }
         }
 
-        return this.optional("%moves_line%", !moves.isEmpty(), String.join(this.moveSeparator, moves));
+        if (moves.isEmpty()) {
+            return this.optional("%moves_line%", false, "");
+        }
+
+        List<String> lines = new ArrayList<>();
+
+        for (int i = 0; i < moves.size(); i += this.movesPerLine) {
+            var last = Math.min(i + this.movesPerLine, moves.size());
+            var chunk = String.join(this.moveSeparator, moves.subList(i, last));
+
+            if (last < moves.size()) {
+                chunk = chunk + this.moveSeparator;
+            }
+
+            lines.add((i == 0 ? this.movesFormat : this.movesContinuationFormat).replace("%moves%", chunk));
+        }
+
+        return Placeholder.multiLine("%moves_line%", lines);
     }
 
     private static String abbreviate(BattleStatsType statsType) {
@@ -452,7 +471,7 @@ public class SpriteConfig {
         List<String> types = new ArrayList<>();
 
         for (var type : pokemon.getForm().getTypes()) {
-            types.add(type.value().name().getString());
+            types.add(String.format("&#%06X", type.value().color().getRGB() & 0xFFFFFF) + type.value().name().getString());
         }
 
         return String.join(this.typeSeparator, types);
@@ -648,6 +667,17 @@ public class SpriteConfig {
 
         public Builder statSeparator(String statSeparator) {
             this.config.statSeparator = statSeparator;
+            return this;
+        }
+
+        public Builder movesPerLine(int movesPerLine) {
+            this.config.movesPerLine = movesPerLine;
+            return this;
+        }
+
+        public Builder movesFormat(String movesFormat, String movesContinuationFormat) {
+            this.config.movesFormat = movesFormat;
+            this.config.movesContinuationFormat = movesContinuationFormat;
             return this;
         }
 
