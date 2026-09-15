@@ -81,3 +81,6 @@ nb-configuration.xml
 ## OS X
 ##############################
 .DS_Store
+# Environment files - never commit, these hold credentials
+.env
+.env.*
