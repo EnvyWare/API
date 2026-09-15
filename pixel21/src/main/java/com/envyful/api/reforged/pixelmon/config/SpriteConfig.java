@@ -55,9 +55,9 @@ public class SpriteConfig {
             "%gmaxfactor%",
             "&7IVs %iv_percentage%%&7 | %ivs%",
             "    %iv_bar% &7hp atk def spa spd spe",
+            "&7EVs  %ev_percentage%%&7 | %evs%",
             "%moves_line%",
             " ",
-            "&7EVs &f%evs%",
             "&7Trainer &f%original_trainer%",
             "%breedable%",
             "%untradeable%",
@@ -273,8 +273,11 @@ public class SpriteConfig {
         placeholders.add(Placeholder.simple("%growth_name%", pokemon.getGrowth().value().getName().getString()));
         placeholders.add(Placeholder.simple("%iv_bar%", this.getIvBar(iVs)));
         placeholders.add(Placeholder.simple("%ivs%", this.getIvs(iVs)));
-        placeholders.add(this.optional("%evs%", (evHP + evAtk + evDef + evSAtk + evSDef + evSpeed) > 0,
-                String.join(this.statSeparator, "&f" + evHP, "&f" + evAtk, "&f" + evDef, "&f" + evSAtk, "&f" + evSDef, "&f" + evSpeed)));
+        var evTotal = evHP + evAtk + evDef + evSAtk + evSDef + evSpeed;
+        placeholders.add(this.optional("%evs%", evTotal > 0, String.join(this.statSeparator,
+                this.ev(evHP), this.ev(evAtk), this.ev(evDef), this.ev(evSAtk), this.ev(evSDef), this.ev(evSpeed))));
+        placeholders.add(this.optional("%ev_percentage%", evTotal > 0,
+                this.getPercentageColour(Math.round((evTotal / 510f) * 100)) + Math.round((evTotal / 510f) * 100)));
         placeholders.add(this.getNatureEffectsPlaceholder(pokemon));
         placeholders.add(this.getMovesLinePlaceholder(pokemon));
         placeholders.add(this.optional("%gmaxfactor%", pokemon.hasGigantamaxFactor(), pokemon.hasGigantamaxFactor() ? this.gmaxFactorTrueFormat : this.gmaxFactorFalseFormat));
@@ -366,6 +369,26 @@ public class SpriteConfig {
         }
 
         return String.join(this.statSeparator, stats);
+    }
+
+    private String ev(int ev) {
+        return this.getEvColour(ev) + ev;
+    }
+
+    private String getEvColour(int ev) {
+        if (ev >= 252) {
+            return this.ivBarPerfectColour;
+        }
+
+        if (ev >= 128) {
+            return this.ivBarHighColour;
+        }
+
+        if (ev >= 64) {
+            return this.ivBarMediumColour;
+        }
+
+        return this.ivBarLowColour;
     }
 
     private String getPercentageColour(int percentage) {
