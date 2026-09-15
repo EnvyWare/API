@@ -51,13 +51,13 @@ public class SpriteConfig {
             "&7Ability &f%ability_name%%ability_ha%",
             "&7Held &f%held_item%",
             "%gmaxfactor%",
-            "&7IVs %iv_percentage%%&8 | %ivs%",
-            "    %iv_bar% &8hp atk def spa spd spe",
+            "&7IVs %iv_percentage%%&7 | %ivs%",
+            "    %iv_bar% &7hp atk def spa spd spe",
             "%moves_line%",
             " ",
-            "&8Friendship %friendship%&8   Growth %growth_name%",
-            "&8EVs %evs%",
-            "&8Trainer %original_trainer%",
+            "&7Friendship %friendship%&7   Growth %growth_name%",
+            "&7EVs %evs%",
+            "&7Trainer %original_trainer%",
             "%breedable%",
             "%untradeable%",
             "%mew_cloned%",
@@ -97,15 +97,15 @@ public class SpriteConfig {
     private String movesFormat = "&7Moves &f%moves%";
     private String movesContinuationFormat = "&7      &f%moves%";
     private String typeSeparator = "&7 / ";
-    private String variantSeparator = "&8 / ";
-    private String statSeparator = "&8/";
+    private String variantSeparator = "&7 / ";
+    private String statSeparator = "&7/";
     private String natureIncreasedFormat = " &a+%stat%";
     private String natureDecreasedFormat = "&c-%stat%";
     private String ivBarGlyph = "█";
-    private String ivBarPerfectColour = "&e";
-    private String ivBarHighColour = "&a";
-    private String ivBarMediumColour = "&9";
-    private String ivBarLowColour = "&8";
+    private String ivBarPerfectColour = "&#FFD24A";
+    private String ivBarHighColour = "&#6FBB7C";
+    private String ivBarMediumColour = "&#6AA9FF";
+    private String ivBarLowColour = "&#9A93A8";
 
     public SpriteConfig() {}
 
