@@ -299,11 +299,12 @@ public class ItemBuilder implements Cloneable {
         }
 
         if (this.name != null && !this.name.getString().isEmpty()) {
-            itemStack.set(DataComponents.CUSTOM_NAME, this.name);
+            itemStack.set(DataComponents.CUSTOM_NAME, nonItalic(this.name));
         }
 
         if (this.lore != null && !this.lore.isEmpty()) {
-            itemStack.set(DataComponents.LORE, new ItemLore(this.lore, this.lore));
+            List<Component> lore = this.lore.stream().map(ItemBuilder::nonItalic).toList();
+            itemStack.set(DataComponents.LORE, new ItemLore(lore, lore));
         }
 
         if (this.unbreakable) {
@@ -321,6 +322,18 @@ public class ItemBuilder implements Cloneable {
         }
 
         return itemStack;
+    }
+
+    /**
+     *
+     * Vanilla renders custom names and lore in italics unless the text says otherwise, and the
+     * &-code parser never sets italic to false, so every configured name and lore line came out
+     * italic. Wrapping the text in a parent with italic off makes upright the default while still
+     * letting &o (an explicit italic on the child) win.
+     *
+     */
+    private static Component nonItalic(Component component) {
+        return Component.empty().withStyle(style -> style.withItalic(false)).append(component);
     }
 
     /**
