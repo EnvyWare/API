@@ -192,6 +192,15 @@ public class ForgeSimplePane implements Pane {
         public ItemStack getItem() {
             return ForgeSimpleDisplayable.Converter.toNative((ForgeSimpleDisplayable) this.displayable);
         }
+
+        /**
+         * Display slots are read-only. The pane's container only has one slot but this slot's index is its
+         * position in the GUI, so a write from outside the GUI (e.g. a Bukkit plugin through Arclight) would
+         * land out of bounds.
+         */
+        @Override
+        public void set(ItemStack stack) {
+        }
     }
 
     public static final class Builder implements Pane.Builder {
